@@ -1,0 +1,13 @@
+development:
+  username: "andrewkayvanfar"
+  password: ""
+  host: "localhost"
+  port: 5432
+  database: "file_importer_development"
+
+test:
+  username: "andrewkayvanfar"
+  password: ""
+  host: "localhost"
+  port: 5432
+  database: "file_importer_test"

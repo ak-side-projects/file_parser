@@ -1,5 +1,8 @@
 require "pg"
 require "csv"
+require_relative "pg_config.rb"
+require_relative "txt_file_parser.rb"
+require_relative "csv_file_parser.rb"
 
 class FileTypeImporter
   attr_reader :file_type, :files_hash, :spec_dir, :data_dir, :db_conn
@@ -19,6 +22,8 @@ class FileTypeImporter
     end
   end
 
+  private
+
   # TODO: Add primary key, sequence, and indexes if necessary
   # TODO: sanitize interpolation to avoid sql injection
   def create_table_sql
@@ -35,6 +40,8 @@ class FileTypeImporter
     sql_arr.join(", ")
   end
 
+  # TODO: Prevent importing the same file twice.
+  # TODO: Import data from txt file in batches if experiencing memory issues.
   def import_data_file(file)
     rows = TxtFileParser.new(file).parse_file(@columns)
     csv_file = "#{file}.csv"
@@ -62,8 +69,8 @@ class FileTypeImporter
   def set_spec_file(files_hash, spec_dir)
     spec_files = files_hash[spec_dir]
 
-    if spec_files.count > 1
-      raise "Each file type should only have 1 spec file."
+    if spec_files.nil? || spec_files.count > 1
+      raise "Each file type should have one 1 spec file."
     end
 
     @spec_file = spec_files.first

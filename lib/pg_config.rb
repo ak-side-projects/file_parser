@@ -1,12 +1,11 @@
+require "yaml"
+
 class PgConfig
   def self.config
-    {
-      username: "andrewkayvanfar",
-      password: "",
-      host: "localhost",
-      port: 5432,
-      database: "file_importer_development"
-    }
+    return @config if @config
+    environment = ENVIRONMENT || "development"
+    all_config = YAML::load(File.open("config/database.yml"))
+    @config = all_config[environment]
   end
 
   def self.db_url

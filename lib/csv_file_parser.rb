@@ -12,17 +12,19 @@ class CsvFileParser
     validate_header_row
 
     data_rows.map do |column_arr|
-      column_name = column_arr[0]
-      width = column_arr[1]
-      datatype = column_arr[2]
-      ColumnInfo.new(column_name, width.to_i, datatype)
+      column_name = column_arr[0].downcase
+      width = column_arr[1].to_i
+      datatype = column_arr[2].upcase
+      ColumnInfo.new(column_name, width, datatype)
     end
   end
 
   private
 
   def validate_header_row
-    header_row == ["column name", "width", "datatype"]
+    unless header_row == ["column name", "width", "datatype"]
+      raise "Header row is invalid."
+    end
   end
 
   def header_row

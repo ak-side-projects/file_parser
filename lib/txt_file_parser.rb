@@ -6,34 +6,37 @@ class TxtFileParser
     get_drop_date
   end
 
+  # TODO: return rows in batches if experiencing memory issues
   def parse_file(columns)
-    rows = []
+    lines = []
 
     File.open(@filepath, "r") do |file|
       file.each_line do |line|
-        rows << parse_line(line, columns)
+        lines << parse_line(line, columns)
       end
     end
 
-    rows
+    lines
   end
+
+  private
 
   def parse_line(line, columns)
     line = line.gsub("\n", "")
-    row = []
+    parsed_line_arr = []
     char_start = 0
 
     columns.each do |column|
       width = column.width
       char_end = char_start + width
       value = line[char_start...char_end]
-      row << format_value(value, column)
+      parsed_line_arr << format_value(value, column)
       char_start += width
     end
 
-    row << @date_str
+    parsed_line_arr << @date_str
 
-    row
+    parsed_line_arr
   end
 
   def format_value(value, column)

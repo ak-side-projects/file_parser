@@ -23,14 +23,12 @@ class ImportChecker
 
     extra_data_file_types = data_file_types - spec_file_types
     if extra_data_file_types.count > 0
-      raise "Data files delivered without corresponding specification files: "\
-            "#{extra_data_file_types.to_a}"
+      raise "Data files delivered without corresponding spec files."
     end
 
     extra_spec_file_types = spec_file_types - data_file_types
     if extra_spec_file_types.count > 0
-      raise "Data files delivered without corresponding specification files: "\
-            "#{extra_spec_file_types.to_a}"
+      raise "Spec files delivered without corresponding data files."
     end
   end
 
@@ -59,7 +57,9 @@ class ImportChecker
     paths.map do |path|
       directory = path.dirname.to_s
       basename = File.basename(path.basename.to_s, path.extname.to_s)
-      basename = basename.split("_").first if directory == @data_directory
+      if directory == @data_directory
+        basename = basename.split("_")[0..-2].join("_")
+      end
 
       @file_types_hash[basename] ||= {}
       @file_types_hash[basename][directory] ||= []
@@ -70,11 +70,11 @@ class ImportChecker
   end
 
   def all_data_files
-    @data_pathnames ||= file_paths_from_directory("data")
+    @data_pathnames ||= file_paths_from_directory(@data_directory)
   end
 
   def all_spec_files
-    @spec_pathnames ||= file_paths_from_directory("specs")
+    @spec_pathnames ||= file_paths_from_directory(@spec_directory)
   end
 
   def file_paths_from_directory(directory)

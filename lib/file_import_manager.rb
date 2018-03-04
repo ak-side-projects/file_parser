@@ -1,4 +1,5 @@
-Dir["lib/*.rb"].each {|file| require_relative file }
+require_relative "import_checker.rb"
+require_relative "file_type_importer.rb"
 
 class FileImportManager
   attr_reader :data_directory, :spec_directory
@@ -28,7 +29,7 @@ class FileImportManager
         files_hash: files_hash,
         spec_dir: @spec_directory,
         data_dir: @data_directory
-      ).import_file
+      ).import_data_files
     end
   end
 end
