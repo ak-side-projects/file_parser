@@ -1,5 +1,7 @@
-require "pg"
 require "csv"
+require 'fileutils'
+require "pathname"
+require "pg"
 require_relative "pg_config.rb"
 require_relative "txt_file_parser.rb"
 require_relative "csv_file_parser.rb"
@@ -42,17 +44,28 @@ class FileTypeImporter
 
   # TODO: Prevent importing the same file twice.
   # TODO: Import data from txt file in batches if experiencing memory issues.
-  def import_data_file(file)
-    rows = TxtFileParser.new(file).parse_file(@columns)
-    csv_file = "#{file}.csv"
-    CSV.open(csv_file, "w") do |csv|
+  def import_data_file(filepath)
+    temp_csv_file = parse_file_into_csv(filepath)
+    import_csv_into_db(temp_csv_file)
+
+    File.delete(temp_csv_file)
+  end
+
+  def parse_file_into_csv(filepath)
+    rows = TxtFileParser.new(filepath).parse_file(@columns)
+    temp_csv_file = temp_csv_filepath_from_actual(filepath)
+
+    CSV.open(temp_csv_file, "w") do |csv|
       rows.each { |row| csv << row }
     end
 
+    temp_csv_file
+  end
+
+  def import_csv_into_db(csv_file)
     @db_conn.exec(create_table_sql)
     copy_sql = copy_csv_sql(csv_file)
     system("psql -c \"#{copy_csv_sql(csv_file)}\" #{PgConfig.db_url}")
-    File.delete(csv_file)
   end
 
   def copy_csv_sql(csv_file)
@@ -74,5 +87,15 @@ class FileTypeImporter
     end
 
     @spec_file = spec_files.first
+  end
+
+  def temp_csv_filepath_from_actual(filepath)
+    basename = File.basename(filepath, ".txt")
+    create_temp_directory_if_necessary
+    "temp/#{basename}.csv"
+  end
+
+  def create_temp_directory_if_necessary
+    Dir.mkdir("../temp") unless File.exists?("../temp")
   end
 end

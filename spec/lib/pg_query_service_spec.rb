@@ -1,10 +1,13 @@
 require "spec_helper"
 require "pg_query_service"
+require "file_import_manager"
 
 describe PgQueryService do
   describe "records_from_table" do
     let(:table_name) { "testformat1" }
+
     before do
+      ENV["environment"] = "test"
       FileImportManager.new.validate_and_import
     end
 

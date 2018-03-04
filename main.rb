@@ -1,4 +1,3 @@
 Dir["lib/*.rb"].each {|file| require_relative file }
-ENVIRONMENT="development"
-
+ENV["environment"]="development"
 FileImportManager.new.validate_and_import
